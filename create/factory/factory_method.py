@@ -18,18 +18,18 @@ class DogFactory(AnimalFactory):
 class CatFactory(AnimalFactory):
     def create_animal(self):
         return Cat()
+if __name__ == '__main__':
+    animal_factory = DogFactory()
+    dog = animal_factory.create_animal()
+    dog.eat()
 
-animal_factory = DogFactory()
-dog = animal_factory.create_animal()
-dog.eat()
-
-animal_factory = CatFactory()
-cat = animal_factory.create_animal()
-cat.eat()
+    animal_factory = CatFactory()
+    cat = animal_factory.create_animal()
+    cat.eat()
 
 # 如此一来，增加产品时不用改原有代码，只需要增加产品子类和工厂子类即可(加个FishFactory，Fish)
 # 实际上，对于Java等强类型语言工厂方法可以使用，python是弱类型的，感觉没必要用
 # 对于python实际上直接用下面方式就行
-dog = Dog()
-cat = Cat()
+    dog = Dog()
+    cat = Cat()
 

@@ -35,11 +35,14 @@ except ImportError:
 class Singleton2(object):
     '使用__new__加锁'
     __instance = None
+    __lock__ = threading.RLock()
 
-    @make_synchronized
+    # @make_synchronized
     def __new__(cls, *args, **kwargs):
-        if cls.__instance is None:
-            cls.__instance = object.__new__(cls, *args, **kwargs)
+        with Singleton2.__lock__:
+            if cls.__instance is None:
+                with Singleton2.__lock__:
+                    cls.__instance = object.__new__(cls, *args, **kwargs)
         return cls.__instance
     
     def __init__(self):

@@ -2,19 +2,23 @@
 # -*- coding: utf-8 -*-
 '单例模式'
 import threading
+import time
+
+count = 0
 
 # 简单形式的单例模式，单线程ok，多线程有风险
 class Singleton(object):
+    '使用__new__'
     __instance = None
-    x = 0
 
     def __new__(cls, *args, **kwargs):
         if not cls.__instance:
             cls.__instance = super(Singleton, cls).__new__(cls, *args, **kwargs)
         return cls.__instance
-
-    def __init__(self, num):
-        self.num = num
+    def __init__(self):
+        global count
+        time.sleep(1)
+        count += 1
 
 # 添加同步锁的单例模式（懒汉加同步锁，挺好）
 try:
@@ -29,17 +33,19 @@ except ImportError:
         return synced_func
 
 class Singleton2(object):
+    '使用__new__加锁'
     __instance = None
-    x = 0
 
     @make_synchronized
     def __new__(cls, *args, **kwargs):
         if cls.__instance is None:
             cls.__instance = object.__new__(cls, *args, **kwargs)
         return cls.__instance
-
-    def __init__(self, num):
-        self.num = num
+    
+    def __init__(self):
+        global count
+        time.sleep(1)
+        count += 1
 
 # 定义类时就创建instance，实现多线程的单例
 def _singleton(cls):
@@ -49,7 +55,11 @@ def _singleton(cls):
 
 @_singleton
 class Singleton3:
-    x = 0
+    '使用__call__'
+    def __init__(self):
+        global count
+        time.sleep(1)
+        count += 1
 
 # 理解方便的定义类时就创建instance，实现多线程的单例
 def singleton(cls):
@@ -62,20 +72,19 @@ def singleton(cls):
 
 @singleton
 class Singleton4(object):
-    x = 0
-
-    def __init__(self, num):
-        self.num = num
+    '使用装饰器处理类'
+    def __init__(self):
+        global count
+        time.sleep(1)
+        count += 1
 
 # 本来想用于测试多线程情况，发现这个测试方法不对
-def test():
+def test(cls_param):
     def work():
-        s = Singleton4(1)
-        s.x += 1
-        print s.x
+        s = cls_param()
 
     tasks = []
-    for _ in xrange(400000):
+    for _ in xrange(2000):
         t = threading.Thread(target=work)
         tasks.append(t)
 
@@ -83,4 +92,21 @@ def test():
         i.start()
     for i in tasks:
         i.join()
-test()
+
+    print cls_param.__doc__ ,count
+
+count = 0
+print '使用__new__创建单例，多线程结果'
+test(Singleton)
+
+count = 0
+print '在__new__基础上加互斥锁，多线程结果'
+test(Singleton2)
+
+count = 0
+print '使用__call__创建单例，多线程结果'
+test(Singleton3)
+
+count = 0
+print '给类使用装饰器创建单例，多线程结果'
+test(Singleton4)

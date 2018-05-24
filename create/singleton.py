@@ -5,6 +5,7 @@ import threading
 import time
 
 count = 0
+id_set = set()
 
 # 简单形式的单例模式，单线程ok，多线程有风险
 class Singleton(object):
@@ -35,14 +36,11 @@ except ImportError:
 class Singleton2(object):
     '使用__new__加锁'
     __instance = None
-    __lock__ = threading.RLock()
 
-    # @make_synchronized
+    @make_synchronized
     def __new__(cls, *args, **kwargs):
-        with Singleton2.__lock__:
-            if cls.__instance is None:
-                with Singleton2.__lock__:
-                    cls.__instance = object.__new__(cls, *args, **kwargs)
+        if cls.__instance is None:
+            cls.__instance = object.__new__(cls, *args, **kwargs)
         return cls.__instance
     
     def __init__(self):
@@ -84,7 +82,9 @@ class Singleton4(object):
 # 本来想用于测试多线程情况，发现这个测试方法不对
 def test(cls_param):
     def work():
+        global id_set
         s = cls_param()
+        id_set.add(id(s))
 
     tasks = []
     for _ in xrange(2000):
@@ -96,20 +96,24 @@ def test(cls_param):
     for i in tasks:
         i.join()
 
-    print cls_param.__doc__ ,count
+    print cls_param.__doc__ ,count, len(id_set)
 
 count = 0
+id_set = set()
 print '使用__new__创建单例，多线程结果'
 test(Singleton)
 
 count = 0
+id_set = set()
 print '在__new__基础上加互斥锁，多线程结果'
 test(Singleton2)
 
 count = 0
+id_set = set()
 print '使用__call__创建单例，多线程结果'
 test(Singleton3)
 
 count = 0
+id_set = set()
 print '给类使用装饰器创建单例，多线程结果'
 test(Singleton4)

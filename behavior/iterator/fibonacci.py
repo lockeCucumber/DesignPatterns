@@ -9,6 +9,6 @@ def generat_fib():
 
 a = generat_fib()
 for i in a:
-    print i
     if i > 10:
         break
+    print i

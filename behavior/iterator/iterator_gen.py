@@ -4,3 +4,6 @@
 def gen(value, max_count):
     for _ in range(max_count):
         yield value
+
+for _ in gen('hello', 3):
+    print _

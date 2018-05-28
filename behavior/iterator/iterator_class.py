@@ -19,3 +19,7 @@ class Iter(object):
 
     def next(self):
         return self.__next__()
+
+iteration = Iter('hello', 3)
+for i in iteration:
+    print i
